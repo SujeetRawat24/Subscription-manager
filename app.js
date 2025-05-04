@@ -8,6 +8,7 @@ import subscriptionRouter from './routes/subscription.routes.js';
 import connectToDatabase from './database/mongodb.js';
 import errorMiddleware from './middleware/error.middleware.js';
 import cookieParser from 'cookie-parser';
+import arcjetMiddleware from './middleware/arcjet.middleware.js';
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.urlencoded({extended: false}))          //to process the form da
 
 app.use(cookieParser());                                //reads cookies from incoming requests to store user data
 
+app.use(arcjetMiddleware);
 
 //Using routes
 
