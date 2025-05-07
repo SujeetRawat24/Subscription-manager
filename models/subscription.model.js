@@ -78,9 +78,9 @@ subscriptionSchema.pre('save', function(next) {
     if(!this.renewalDate){
         const renewalPeriods = {
             daily : 1,
-            quarterly : 3,
             weekly: 7,
             monthly: 30,
+            quarterly : 90,
             yearly : 365,
         };
 
