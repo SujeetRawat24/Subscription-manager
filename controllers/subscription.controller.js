@@ -31,6 +31,29 @@ export const createSubscription = async (req, res, next) => {
     }
 }
 
+export const getSubscriptionDetails = async (req, res, next) => {
+    try {
+      const subscription = await Subscription.findById(req.params.id);
+      
+      if (!subscription) {
+        const error = new Error("Subscription not found");
+        error.status = 404;
+        throw error;
+      }
+  
+      // Authorization check
+      if (subscription.user.toString() !== req.user.id) {
+        const error = new Error("Unauthorized access to subscription");
+        error.status = 403;
+        throw error;
+      }
+  
+      res.status(200).json({ success: true, data: subscription });
+    } catch (error) {
+      next(error);
+    }
+  };
+
 export const updateSubscription = async (req, res, next) => {
     try {
       const subscription = await Subscription.findById(req.params.id);
@@ -48,21 +71,23 @@ export const updateSubscription = async (req, res, next) => {
         throw error;
       }
   
-      // Update fields (exclude protected fields like user ID)
       const allowedUpdates = ["name", "price", "currency", "frequency", "category", "paymentMethod", "status", "startDate"];
       const updates = Object.keys(req.body);
       
-      const isValidUpdate = updates.every(update => 
-        allowedUpdates.includes(update)
+      // Checking for invalid fields
+      const invalidUpdates = updates.filter(
+        (field) => !allowedUpdates.includes(field)
       );
   
-      if (!isValidUpdate) {
-        const error = new Error("Invalid update fields");
+      if (invalidUpdates.length > 0) {
+        const error = new Error(
+          `Invalid update field(s): ${invalidUpdates.join(", ")}`
+        );
         error.status = 400;
         throw error;
       }
   
-      // Apply updates and save (triggers pre-save hook)
+      // Applying updates and save (triggers pre-save hook)
       updates.forEach(update => subscription[update] = req.body[update]);
       await subscription.save();
   
